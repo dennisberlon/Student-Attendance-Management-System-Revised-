@@ -4,7 +4,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class StudentAttendanceMonitoringSystem1 {
+public class StudentAttendanceMonitoringSystem {
 
     // ==========================================
     // STUDENT CLASS
@@ -197,14 +197,14 @@ public class StudentAttendanceMonitoringSystem1 {
             // VALIDATE MENU INPUT
             // ==========================================
 
-            try {
+            if (choiceInput.matches("\\d+")) {
 
                 // Converts the menu input from text into an integer.
                 choice = Integer.parseInt(choiceInput);
 
-            // Handles input that is not a valid number.
-            } catch (NumberFormatException e) {
+            } else {
 
+                // Handles input that is not a valid number.
                 JOptionPane.showMessageDialog(
                         null,
                         "ERROR: Please enter a number from 1 to 4.",
@@ -837,14 +837,14 @@ public class StudentAttendanceMonitoringSystem1 {
                     // Stores the number entered to select a student.
                     int number;
 
-                    try {
+                    if (numberInput.trim().matches("\\d+")) {
 
                         // Converts the selected student number into an integer.
                         number = Integer.parseInt(
                                 numberInput.trim()
                         );
 
-                    } catch (NumberFormatException e) {
+                    } else {
 
                         JOptionPane.showMessageDialog(
                                 null,
