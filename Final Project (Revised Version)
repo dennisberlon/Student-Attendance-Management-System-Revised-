@@ -1,0 +1,443 @@
+
+import java.util.ArrayList;
+import java.time.LocalDate;
+import javax.swing.*;
+import java.awt.*;
+
+public class StudentAttendanceMonitoringSystem2 extends JFrame {
+
+    private ArrayList<Student> students = new ArrayList<>();
+
+    private JTextField idField, nameField, addDateField, attendanceDateField;
+    private JComboBox<String> addStatusBox, attendanceStatusBox, studentBox;
+    private JTextArea recordsArea;
+
+    // STUDENT CLASS
+    class Student {
+        String studentId, name, block, course, year;
+        ArrayList<String> attendance = new ArrayList<>();
+
+        Student(String id, String name, String block, String course, String year) {
+            this.studentId = id;
+            this.name = name;
+            this.block = block;
+            this.course = course;
+            this.year = year;
+        }
+
+        String getStudentInfo() {
+            return "Student ID : " + studentId
+                    + "\nName       : " + name
+                    + "\nBlock      : " + block
+                    + "\nProgram    : " + course
+                    + "\nYear       : " + year;
+        }
+
+        String getAttendanceInfo() {
+            int present = 0, absent = 0;
+            String result = "Attendance Record:\n";
+
+            if (attendance.isEmpty()) {
+                result += "No attendance record yet.\n";
+            } else {
+                for (String record : attendance) {
+                    result += record + "\n";
+
+                    if (record.endsWith("Present")) {
+                        present++;
+                    } else if (record.endsWith("Absent")) {
+                        absent++;
+                    }
+                }
+            }
+
+            return result + "\nTotal Present: " + present
+                    + "\nTotal Absent : " + absent;
+        }
+    }
+
+    // MAIN CONSTRUCTOR
+    public StudentAttendanceMonitoringSystem2() {
+        setTitle("Student Attendance Monitoring System");
+        setSize(720, 570);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        showMenu();
+    }
+
+    // MAIN MENU
+    private void showMenu() {
+        JPanel panel = new JPanel(new GridLayout(5, 1, 12, 12));
+        panel.setBorder(BorderFactory.createEmptyBorder(35, 45, 35, 45));
+
+        JLabel title = new JLabel(
+                "STUDENT ATTENDANCE MONITORING SYSTEM",
+                SwingConstants.CENTER);
+
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+
+        JButton addButton = new JButton("Add Student");
+        JButton recordsButton = new JButton("View Student Records");
+        JButton attendanceButton = new JButton("Mark Attendance");
+        JButton exitButton = new JButton("Exit");
+
+        addButton.addActionListener(e -> showAddStudent());
+        recordsButton.addActionListener(e -> showRecords());
+
+        attendanceButton.addActionListener(e -> {
+            if (students.isEmpty()) {
+                showMessage("No students available. Please add a student first.");
+            } else {
+                showAttendance();
+            }
+        });
+
+        exitButton.addActionListener(e -> System.exit(0));
+
+        panel.add(title);
+        panel.add(addButton);
+        panel.add(recordsButton);
+        panel.add(attendanceButton);
+        panel.add(exitButton);
+
+        setContentPane(panel);
+        revalidate();
+        repaint();
+    }
+
+    // ADD STUDENT FORM
+    private void showAddStudent() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+
+        JLabel title = new JLabel("ADD STUDENT", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+
+        JPanel form = new JPanel(new GridLayout(7, 2, 8, 8));
+
+        idField = new JTextField();
+        nameField = new JTextField();
+        addDateField = new JTextField();
+
+        addStatusBox = new JComboBox<>(
+                new String[]{"Present", "Absent"});
+
+        addField(form, "Student ID (2025-01-12345):", idField);
+        addField(form, "Student Name (SURNAME, GIVEN M.):", nameField);
+        addField(form, "Block:", new JLabel("BLOCK A"));
+        addField(form, "Program/Course:", new JLabel("BSIT"));
+        addField(form, "Year:", new JLabel("2ND YEAR"));
+        addField(form, "First Attendance Date (MM/DD/YYYY):", addDateField);
+        addField(form, "First Attendance Status:", addStatusBox);
+
+        JButton saveButton = new JButton("Save Student");
+        JButton backButton = new JButton("Back");
+
+        saveButton.addActionListener(e -> addStudent());
+        backButton.addActionListener(e -> showMenu());
+
+        JPanel buttons = new JPanel();
+        buttons.add(saveButton);
+        buttons.add(backButton);
+
+        panel.add(title, BorderLayout.NORTH);
+        panel.add(form, BorderLayout.CENTER);
+        panel.add(buttons, BorderLayout.SOUTH);
+
+        setContentPane(panel);
+        revalidate();
+        repaint();
+    }
+
+    // MARK ATTENDANCE FORM
+    private void showAttendance() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+
+        JLabel title = new JLabel("MARK ATTENDANCE", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+
+        JPanel form = new JPanel(new GridLayout(3, 2, 8, 8));
+
+        studentBox = new JComboBox<>();
+        attendanceDateField = new JTextField();
+
+        attendanceStatusBox = new JComboBox<>(
+                new String[]{"Present", "Absent"});
+
+        refreshStudentChoices();
+
+        addField(form, "Select Student:", studentBox);
+        addField(form, "Attendance Date (MM/DD/YYYY):", attendanceDateField);
+        addField(form, "Attendance Status:", attendanceStatusBox);
+
+        JButton saveButton = new JButton("Save Attendance");
+        JButton backButton = new JButton("Back");
+
+        saveButton.addActionListener(e -> markAttendance());
+        backButton.addActionListener(e -> showMenu());
+
+        JPanel buttons = new JPanel();
+        buttons.add(saveButton);
+        buttons.add(backButton);
+
+        panel.add(title, BorderLayout.NORTH);
+        panel.add(form, BorderLayout.CENTER);
+        panel.add(buttons, BorderLayout.SOUTH);
+
+        setContentPane(panel);
+        revalidate();
+        repaint();
+    }
+
+    // VIEW STUDENT RECORDS
+    private void showRecords() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(25, 35, 25, 35));
+
+        JLabel title = new JLabel(
+                "ALL STUDENT RECORDS", SwingConstants.CENTER);
+
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+
+        recordsArea = new JTextArea();
+        recordsArea.setEditable(false);
+        recordsArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+
+        JButton refreshButton = new JButton("Refresh");
+        JButton backButton = new JButton("Back");
+
+        refreshButton.addActionListener(e -> displayRecords());
+        backButton.addActionListener(e -> showMenu());
+
+        JPanel buttons = new JPanel();
+        buttons.add(refreshButton);
+        buttons.add(backButton);
+
+        panel.add(title, BorderLayout.NORTH);
+        panel.add(new JScrollPane(recordsArea), BorderLayout.CENTER);
+        panel.add(buttons, BorderLayout.SOUTH);
+
+        setContentPane(panel);
+
+        displayRecords();
+
+        revalidate();
+        repaint();
+    }
+
+    // ADD LABEL AND INPUT FIELD
+    private void addField(JPanel panel, String label, Component field) {
+        panel.add(new JLabel(label));
+        panel.add(field);
+    }
+
+    // DISPLAY MESSAGE
+    private void showMessage(String message) {
+        JDialog dialog = new JDialog(
+                this, "Student Attendance System", true);
+
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        JLabel label = new JLabel(
+                "<html>" + message.replace("\n", "<br>") + "</html>");
+
+        label.setBorder(
+                BorderFactory.createEmptyBorder(18, 20, 8, 20));
+
+        JButton okButton = new JButton("OK");
+        okButton.addActionListener(e -> dialog.dispose());
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(okButton);
+
+        dialog.add(label, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+    // DATE VALIDATION
+    private boolean validDate(String date) {
+        try {
+            String[] parts = date.split("/");
+
+            if (parts.length != 3) {
+                throw new Exception();
+            }
+
+            int month = Integer.parseInt(parts[0]);
+            int day = Integer.parseInt(parts[1]);
+            int year = Integer.parseInt(parts[2]);
+
+            LocalDate.of(year, month, day);
+            return true;
+
+        } catch (Exception e) {
+            showMessage("Invalid date. Please use MM/DD/YYYY.");
+            return false;
+        }
+    }
+
+    // FIND STUDENT USING ID
+    private Student findStudent(String id) {
+        for (Student student : students) {
+            if (student.studentId.equalsIgnoreCase(id)) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    // CHECK DUPLICATE ATTENDANCE DATE
+    private boolean dateAlreadyUsedByStudent(
+            Student student, String date) {
+
+        for (String record : student.attendance) {
+            if (record.startsWith(date + " -")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // BUBBLE SORT
+    private void sortStudents() {
+        for (int i = 0; i < students.size() - 1; i++) {
+            for (int j = 0; j < students.size() - i - 1; j++) {
+
+                if (students.get(j).name.compareToIgnoreCase(
+                        students.get(j + 1).name) > 0) {
+
+                    Student temp = students.get(j);
+                    students.set(j, students.get(j + 1));
+                    students.set(j + 1, temp);
+                }
+            }
+        }
+    }
+
+    // ADD STUDENT
+    private void addStudent() {
+        String id = idField.getText().trim();
+        String name = nameField.getText().trim().toUpperCase();
+        String date = addDateField.getText().trim();
+
+        if (!id.matches("2025-\\d{2}-\\d{5}")) {
+            showMessage(
+                    "Invalid Student ID.\nRequired format: 2025-01-12345");
+            return;
+        }
+
+        if (findStudent(id) != null) {
+            showMessage("Student ID already exists.");
+            return;
+        }
+
+        if (!name.contains(",") || !name.endsWith(".")) {
+            showMessage("Invalid name format.\nExample: DELA CRUZ, JUAN R.");
+            return;
+        }
+
+        if (date.isEmpty() || !validDate(date)) {
+            return;
+        }
+
+        Student student = new Student(
+                id, name, "BLOCK A", "BSIT", "2ND YEAR");
+
+        student.attendance.add(
+                date + " - " + addStatusBox.getSelectedItem());
+
+        students.add(student);
+        sortStudents();
+
+        showMessage(
+                "Student saved successfully!\n\n"
+                + student.getStudentInfo()
+                + "\n\nFirst attendance: " + date + " - "
+                + addStatusBox.getSelectedItem());
+
+        idField.setText("");
+        nameField.setText("");
+        addDateField.setText("");
+
+        showMenu();
+    }
+
+    // MARK ATTENDANCE
+    private void markAttendance() {
+        int index = studentBox.getSelectedIndex();
+
+        if (index < 0) {
+            showMessage("Please select a student.");
+            return;
+        }
+
+        Student student = students.get(index);
+        String date = attendanceDateField.getText().trim();
+
+        if (date.isEmpty() || !validDate(date)) {
+            return;
+        }
+
+        if (dateAlreadyUsedByStudent(student, date)) {
+            showMessage(
+                    student.name + " already has an attendance record for "
+                    + date + ".");
+            return;
+        }
+
+        String status = (String) attendanceStatusBox.getSelectedItem();
+
+        student.attendance.add(date + " - " + status);
+
+        showMessage(
+                "Attendance marked as " + status.toUpperCase() + ".");
+
+        attendanceDateField.setText("");
+        showMenu();
+    }
+
+    // REFRESH STUDENT LIST
+    private void refreshStudentChoices() {
+        sortStudents();
+        studentBox.removeAllItems();
+
+        for (Student student : students) {
+            studentBox.addItem(
+                    student.name + " (" + student.studentId + ")");
+        }
+    }
+
+    // DISPLAY ALL RECORDS
+    private void displayRecords() {
+        sortStudents();
+
+        String output = "";
+
+        if (students.isEmpty()) {
+            output = "No student records found.";
+        } else {
+            for (Student student : students) {
+
+                output += "----------------------------------------\n"
+                        + student.getStudentInfo() + "\n\n"
+                        + student.getAttendanceInfo() + "\n\n";
+            }
+        }
+
+        recordsArea.setText(output);
+        recordsArea.setCaretPosition(0);
+    }
+
+    // MAIN METHOD
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() ->
+                new StudentAttendanceMonitoringSystem2().setVisible(true));
+    }
+}
