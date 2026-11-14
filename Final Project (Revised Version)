@@ -58,6 +58,8 @@ public class StudentAttendanceMonitoringSystem2 extends JFrame {
     // MAIN CONSTRUCTOR
     public StudentAttendanceMonitoringSystem2() {
         setTitle("Student Attendance Monitoring System");
+        ImageIcon icon = new ImageIcon("attendance-logo.png");
+        setIconImage(icon.getImage());
         setSize(720, 570);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -219,11 +221,10 @@ public class StudentAttendanceMonitoringSystem2 extends JFrame {
         panel.add(buttons, BorderLayout.SOUTH);
 
         setContentPane(panel);
-
-        displayRecords();
-
         revalidate();
         repaint();
+
+        displayRecords();
     }
 
     // ADD LABEL AND INPUT FIELD
@@ -239,8 +240,7 @@ public class StudentAttendanceMonitoringSystem2 extends JFrame {
 
         dialog.setLayout(new BorderLayout(10, 10));
 
-        JLabel label = new JLabel(
-                "<html>" + message.replace("\n", "<br>") + "</html>");
+        JLabel label = new JLabel(message);
 
         label.setBorder(
                 BorderFactory.createEmptyBorder(18, 20, 8, 20));
@@ -431,7 +431,6 @@ public class StudentAttendanceMonitoringSystem2 extends JFrame {
         }
 
         recordsArea.setText(output);
-        recordsArea.setCaretPosition(0);
     }
 
     // MAIN METHOD
